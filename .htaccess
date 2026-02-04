@@ -1,0 +1,9 @@
+RewriteEngine On
+
+# Zaten public içindeysek dokunma
+RewriteRule ^public/ - [L]
+
+# Dosya/klasör yoksa public altına yönlendir
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ public/$1 [L]

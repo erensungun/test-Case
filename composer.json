@@ -1,0 +1,14 @@
+{
+    "name": "eren/ecommerce-cart-api",
+    "description": "Pure PHP OOP REST API (Products, Cart, Favorites, Coupons)",
+    "type": "project",
+    "require": {
+        "php": ">=8.1",
+        "ext-pdo": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    }
+}
