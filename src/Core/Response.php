@@ -5,7 +5,23 @@ namespace App\Core;
 
 final class Response
 {
-    #başarılı response döndürme
+
+    public static function setCookie(
+        string $name,
+        string $value,
+        int $ttlSeconds = 2592000 // 30 gün
+    ): void {
+        setcookie($name, $value, [
+            'expires'  => time() + $ttlSeconds,
+            'path'     => '/',
+            'httponly' => true,
+            'samesite' => 'Lax',
+            // localhost genelde https olmadığı için false
+            'secure'   => false,
+        ]);
+    }
+
+    // başarılı response döndürme
     public static function jsonSuccess(
         mixed $data = null,
         string $message = "İşlem başarılı",
@@ -20,11 +36,11 @@ final class Response
             "message" => $message
         ], JSON_UNESCAPED_UNICODE);
 
-        #response döndükten sonra kodun devam etmemesi için exit
+        // response döndükten sonra kodun devam etmemesi için exit
         exit;
     }
 
-    #hata response döndürme
+    // hata response döndürme
     public static function jsonError(string $code, string $message, int $status): void
     {
         http_response_code($status);

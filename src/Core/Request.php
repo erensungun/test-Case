@@ -6,13 +6,13 @@ namespace App\Core;
 final class Request
 {
 
-    #HTTP method'u döndürür
+    // HTTP method'u döndürür
     public function method(): string
     {
         return strtoupper($_SERVER["REQUEST_METHOD"] ?? "GET");
     }
 
-    #URL path'i döndürür
+    // URL path'i döndürür
     public function path(): string
     {
         $uri  = $_SERVER['REQUEST_URI'] ?? '/';
@@ -30,20 +30,31 @@ final class Request
         return rtrim($path, "/") ?: "/";
     }
 
-    # parametreleri alma
+    // parametreleri alma
     public function query(string $key, mixed $default = null): mixed
     {
         return $_GET[$key] ?? $default;
     }
 
-    # header http ile başlayan formattan alınır
+    // header http ile başlayan formattan alınır
     public function header(string $name, mixed $default = null): mixed
     {
+        // getallheaders varsa önce onu dene
+        if (function_exists('getallheaders')) {
+            $headers = getallheaders();
+            foreach ($headers as $k => $v) {
+                if (strcasecmp($k, $name) === 0) {
+                    return $v;
+                }
+            }
+        }
+
+        // fallback: PHP'nin $_SERVER mapping'i
         $key = "HTTP_" . strtoupper(str_replace("-", "_", $name));
         return $_SERVER[$key] ?? $default;
     }
 
-    #json body okuma istekler burda okunur
+    // json body okuma istekler burda okunur
     public function json(): array
     {
         $raw = file_get_contents("php://input");
@@ -56,5 +67,11 @@ final class Request
         
         #istekte hata varsa null döndür
         return is_array($data) ? $data : [];
+    }
+
+    // Cookie okuma
+    public function cookie(string $key, mixed $default = null): mixed
+    {
+        return $_COOKIE[$key] ?? $default;
     }
 }

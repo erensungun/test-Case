@@ -16,6 +16,8 @@ use App\Repositories\CategoryRepository;
 use App\Services\ProductService;
 use App\Services\CategoryService;
 
+use App\Helpers\SessionManager;
+
 #autload
 require __DIR__ . "/../vendor/autoload.php";
 
@@ -36,6 +38,11 @@ $request = new Request();
 $router = new Router();
 
 $router->add('GET', '/ping', fn($req, $params) => Response::jsonSuccess(['pong' => true], 'OK'));
+
+$router->add('GET', '/whoami', function($req, $params) use ($request) {
+    $sid = SessionManager::getSessionId($request);
+    Response::jsonSuccess(['session_id' => $sid], 'OK');
+});
 
 $productRepo  = new ProductRepository($db->pdo());
 $categoryRepo = new CategoryRepository($db->pdo());
