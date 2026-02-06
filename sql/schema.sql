@@ -80,3 +80,6 @@ CREATE TABLE favorites (
         FOREIGN KEY (product_id) REFERENCES products(id),
     CONSTRAINT uq_fav UNIQUE (session_id, product_id)
 );
+
+ALTER TABLE cart_items
+ADD UNIQUE KEY uniq_cart_product (cart_id, product_id);

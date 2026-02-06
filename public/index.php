@@ -9,12 +9,15 @@ use App\Exceptions\HttpException;
 
 use App\Controllers\ProductController;
 use App\Controllers\CategoryController;
+use App\Controllers\CartController;
 
 use App\Repositories\ProductRepository;
 use App\Repositories\CategoryRepository;
+use App\Repositories\CartRepository;
 
 use App\Services\ProductService;
 use App\Services\CategoryService;
+use App\Services\CartService;
 
 use App\Helpers\SessionManager;
 
@@ -37,26 +40,35 @@ $db = new Database($config);
 $request = new Request();
 $router = new Router();
 
-$router->add('GET', '/ping', fn($req, $params) => Response::jsonSuccess(['pong' => true], 'OK'));
+$productRepo  = new ProductRepository($db->pdo());
+$categoryRepo = new CategoryRepository($db->pdo());
+$cartRepo     = new CartRepository($db->pdo());
+
+$productService  = new ProductService($productRepo);
+$categoryService = new CategoryService($categoryRepo);
+$cartService     = new CartService($cartRepo, $productRepo);
+
+$productController  = new ProductController($request, $productService);
+$categoryController = new CategoryController($request, $categoryService);
+$cartController     = new CartController($request, $cartService);
+
+$router->add('GET', '/ping', fn($req, $params) =>
+    Response::jsonSuccess(['pong' => true], 'OK')
+);
 
 $router->add('GET', '/whoami', function($req, $params) use ($request) {
     $sid = SessionManager::getSessionId($request);
     Response::jsonSuccess(['session_id' => $sid], 'OK');
 });
 
-$productRepo  = new ProductRepository($db->pdo());
-$categoryRepo = new CategoryRepository($db->pdo());
-
-$productService  = new ProductService($productRepo);
-$categoryService = new CategoryService($categoryRepo);
-
-$productController  = new ProductController($request, $productService);
-$categoryController = new CategoryController($request, $categoryService);
+$router->add('GET',    '/api/cart',           fn($req, $params) => $cartController->show());
+$router->add('POST',   '/api/cart/items',     fn($req, $params) => $cartController->addItem());
+$router->add('PUT',    '/api/cart/items/{id}',fn($req, $params) => $cartController->updateItem($params));
+$router->add('DELETE', '/api/cart/items/{id}',fn($req, $params) => $cartController->removeItem($params));
+$router->add('DELETE', '/api/cart',           fn($req, $params) => $cartController->clear());
 
 $router->add('GET', '/api/products', fn() => $productController->index());
-
 $router->add('GET', '/api/products/{id}', fn($req, $params) => $productController->show($params));
-
 $router->add('GET', '/api/categories', fn() => $categoryController->index());
 
 $router->dispatch($request);
