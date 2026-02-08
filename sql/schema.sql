@@ -1,6 +1,6 @@
 CREATE DATABASE IF NOT EXISTS ecommerce_api
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_unicode_ci;
 
 USE ecommerce_api;
 
@@ -83,3 +83,6 @@ CREATE TABLE favorites (
 
 ALTER TABLE cart_items
 ADD UNIQUE KEY uniq_cart_product (cart_id, product_id);
+
+ALTER TABLE facorites
+ADD UNIQUE KEY uniq_fav_session_product (session_id, product_id);

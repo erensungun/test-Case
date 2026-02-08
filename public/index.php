@@ -10,14 +10,17 @@ use App\Exceptions\HttpException;
 use App\Controllers\ProductController;
 use App\Controllers\CategoryController;
 use App\Controllers\CartController;
+use App\Controllers\FavoriteController;
 
 use App\Repositories\ProductRepository;
 use App\Repositories\CategoryRepository;
 use App\Repositories\CartRepository;
+use App\Repositories\FavoriteRepository;
 
 use App\Services\ProductService;
 use App\Services\CategoryService;
 use App\Services\CartService;
+use App\Services\FavoriteService;
 
 use App\Helpers\SessionManager;
 
@@ -43,14 +46,17 @@ $router = new Router();
 $productRepo  = new ProductRepository($db->pdo());
 $categoryRepo = new CategoryRepository($db->pdo());
 $cartRepo     = new CartRepository($db->pdo());
+$favoriteRepo = new FavoriteRepository($db->pdo());
 
 $productService  = new ProductService($productRepo);
 $categoryService = new CategoryService($categoryRepo);
 $cartService     = new CartService($cartRepo, $productRepo);
+$favoriteService = new FavoriteService($favoriteRepo, $productRepo, $cartRepo);
 
 $productController  = new ProductController($request, $productService);
 $categoryController = new CategoryController($request, $categoryService);
 $cartController     = new CartController($request, $cartService);
+$favoriteController = new FavoriteController($request, $favoriteService);
 
 $router->add('GET', '/ping', fn($req, $params) =>
     Response::jsonSuccess(['pong' => true], 'OK')
@@ -70,5 +76,10 @@ $router->add('DELETE', '/api/cart',           fn($req, $params) => $cartControll
 $router->add('GET', '/api/products', fn() => $productController->index());
 $router->add('GET', '/api/products/{id}', fn($req, $params) => $productController->show($params));
 $router->add('GET', '/api/categories', fn() => $categoryController->index());
+
+$router->add('GET',    '/api/favorites', fn($req, $params) => $favoriteController->index());
+$router->add('POST',   '/api/favorites', fn($req, $params) => $favoriteController->store());
+$router->add('DELETE', '/api/favorites/{product_id}', fn($req, $params) => $favoriteController->destroy($params));
+$router->add('POST',   '/api/favorites/{product_id}/add-to-cart', fn($req, $params) => $favoriteController->addToCart($params));
 
 $router->dispatch($request);
