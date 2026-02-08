@@ -16,6 +16,7 @@ use App\Repositories\ProductRepository;
 use App\Repositories\CategoryRepository;
 use App\Repositories\CartRepository;
 use App\Repositories\FavoriteRepository;
+use App\Repositories\CouponRepository;
 
 use App\Services\ProductService;
 use App\Services\CategoryService;
@@ -47,10 +48,11 @@ $productRepo  = new ProductRepository($db->pdo());
 $categoryRepo = new CategoryRepository($db->pdo());
 $cartRepo     = new CartRepository($db->pdo());
 $favoriteRepo = new FavoriteRepository($db->pdo());
+$couponRepo   = new CouponRepository($db->pdo());
 
 $productService  = new ProductService($productRepo);
 $categoryService = new CategoryService($categoryRepo);
-$cartService     = new CartService($cartRepo, $productRepo);
+$cartService     = new CartService($cartRepo, $productRepo, $couponRepo);
 $favoriteService = new FavoriteService($favoriteRepo, $productRepo, $cartRepo);
 
 $productController  = new ProductController($request, $productService);
@@ -81,5 +83,8 @@ $router->add('GET',    '/api/favorites', fn($req, $params) => $favoriteControlle
 $router->add('POST',   '/api/favorites', fn($req, $params) => $favoriteController->store());
 $router->add('DELETE', '/api/favorites/{product_id}', fn($req, $params) => $favoriteController->destroy($params));
 $router->add('POST',   '/api/favorites/{product_id}/add-to-cart', fn($req, $params) => $favoriteController->addToCart($params));
+
+$router->add('POST',   '/api/cart/coupon', fn($req, $params) => $cartController->applyCoupon());
+$router->add('DELETE', '/api/cart/coupon', fn($req, $params) => $cartController->removeCoupon());
 
 $router->dispatch($request);

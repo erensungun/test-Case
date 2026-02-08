@@ -74,4 +74,30 @@ final class CartController
 
         Response::jsonSuccess($data, 'Sepet temizlendi');
     }
+
+    // POST /api/cart/coupon
+    public function applyCoupon(): void
+    {
+        $sessionId = SessionManager::getSessionId($this->request);
+        $body = $this->request->json();
+
+        $code = trim((string)($body["code"] ?? ""));
+        if($code === "") {
+            Response::jsonError("INVALID_COUPON", "Kupon kodu zorunludur", 400);
+        }
+
+        $data = $this->cartService->applyCoupon($sessionId, $code);
+
+        Response::jsonSuccess($data, "Kupon uygulandı");
+    }
+
+    // DELETE /api/cart/coupon
+    public function removeCoupon(): void
+    {
+        $sessionId = SessionManager::getSessionId($this->request);
+
+        $data = $this->cartService->removeCoupon($sessionId);
+
+        Response::jsonSuccess($data, "Kupon kaldırıldı");
+    }
 }

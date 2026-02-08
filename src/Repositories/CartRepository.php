@@ -122,4 +122,33 @@ final class CartRepository
         $stmt = $this->pdo->prepare("UPDATE carts SET updated_at = NOW() WHERE id = :id");
         $stmt->execute(["id" => $cartId]);
     }
+
+    public function setCoupon(int $cartId, int $couponId): void
+    {
+        $stmt = $this->pdo->prepare("
+            UPDATE carts
+            SET coupon_id = :cid, updated_at = NOW()
+            WHERE id = :id
+        ");
+        $stmt->execute(["cid" => $couponId, "id" => $cartId]);
+    }
+
+    public function removeCoupon(int $cartId): void
+    {
+        $stmt = $this->pdo->prepare("
+            UPDATE carts
+            SET coupon_id = NULL, updated_at = NOW()
+            WHERE id = :id
+        ");
+        $stmt->execute(["id" => $cartId]);
+    }
+
+    public function getCouponId(int $cartId): ?int
+    {
+        $stmt = $this->pdo->prepare("SELECT coupon_id FROM carts WHERE id = :id LIMIT 1");
+        $stmt->execute(["id" => $cartId]);
+
+        $val = $stmt->fetchColumn();
+        return ($val === false || $val === null) ? null: (int)$val;
+    }
 }
